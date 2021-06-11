@@ -54,7 +54,9 @@
 
 <img src="pictures/image-20210611161115059.png" alt="image-20210611161115059" style="zoom:80%;" />
 
-第152行，执行kernel_enter，这个函数会把通用寄存器的内容存放到`SP_EL1`指向的内存空间，这里`SP_EL1`指向的是当前`thread`的`NODE_STATE(ksCurThread)->tcbArch.tcbContext.registers`。
+第152行，执行kernel_enter，这个函数会把通用寄存器的内容存放到`SP_EL1`指向的内存空间，这里`SP_EL1`指向的是当前`thread`的`NODE_STATE(ksCurThread)->tcbArch.tcbContext.registers`：
+
+![image-20210611230401344](pictures/image-20210611230401344.png)
 
 
 
@@ -84,7 +86,7 @@
 
 第119行，执行系统调用`handleSyscall(syscall)`
 
-第122行，从`EL1`返回到`EL0`，即从内核态返回到用户态，在restore_user_context中比较重要的是会将SP_EL1的内容设置为`NODE_STATE(ksCurThread)->tcbArch.tcbContext.registers`
+第122行，从`EL1`返回到`EL0`，即从内核态返回到用户态，在restore_user_context中比较重要的是会将`SP_EL1`的内容设置为`NODE_STATE(ksCurThread)->tcbArch.tcbContext.registers`
 
 
 
@@ -137,10 +139,14 @@ static exception_t handleInvocation(bool_t isCall, bool_t isBlocking)
 
     thread = NODE_STATE(ksCurThread);
     
-    /*
-    
+    /* 
+    	下面调用getRegister读取thread->tcbArch.tcbContext.registers[msgInfoRegister]的值，
+    	msgInfoRegister是宏定义，为1，也就是读取thread->tcbArch.tcbContext.registers[1]的值，
+    	在异常入口的kernel_enter中会将通用寄存器的值存放到thread->tcbArch.tcbContext.registers中，
+    	所以registers[1]的内容来自X1,所以这里获取的就是传给seL4_Send的第二个参数msgInfo
     */
     info = messageInfoFromWord(getRegister(thread, msgInfoRegister));
+    
     
     cptr_t cptr = getRegister(thread, capRegister);
 
