@@ -54,6 +54,10 @@
 
 <img src="pictures/image-20210611161115059.png" alt="image-20210611161115059" style="zoom:80%;" />
 
+第152行，执行kernel_enter，这个函数会把通用寄存器的内容存放到`SP_EL1`指向的内存空间，这里`SP_EL1`指向的是当前`thread`的`NODE_STATE(ksCurThread)->tcbArch.tcbContext.registers`。
+
+
+
 当异常发生后，在`ESR_EL1`中存放的是异常发生的原因，对于`SVC`异常，在`ARMv8`的手册中规定如下：
 
 ![image-20210611161937582](pictures/image-20210611161937582.png)
@@ -80,7 +84,7 @@
 
 第119行，执行系统调用`handleSyscall(syscall)`
 
-第122行，从`EL1`返回到`EL0`，即从内核态返回到用户态。
+第122行，从`EL1`返回到`EL0`，即从内核态返回到用户态，在restore_user_context中比较重要的是会将SP_EL1的内容设置为`NODE_STATE(ksCurThread)->tcbArch.tcbContext.registers`
 
 
 
@@ -123,7 +127,6 @@ exception_t handleSyscall(syscall_t syscall)
 
 ```C
 static exception_t handleInvocation(bool_t isCall, bool_t isBlocking)
-#endif
 {
     seL4_MessageInfo_t info;
     lookupCapAndSlot_ret_t lu_ret;
