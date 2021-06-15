@@ -143,11 +143,11 @@ static exception_t handleInvocation(bool_t isCall, bool_t isBlocking)
     	下面调用getRegister读取thread->tcbArch.tcbContext.registers[msgInfoRegister]的值，
     	msgInfoRegister是宏定义，为1，也就是读取thread->tcbArch.tcbContext.registers[1]的值，
     	在异常入口的kernel_enter中会将通用寄存器的值存放到thread->tcbArch.tcbContext.registers中，
-    	所以registers[1]的内容来自X1,所以这里获取的就是传给seL4_Send的第二个参数msgInfo
+    	registers[1]的内容来自X1,所以这里获取的就是传给seL4_Send的第二个参数msgInfo
     */
     info = messageInfoFromWord(getRegister(thread, msgInfoRegister));
     
-    
+    /* capRegister的值是0，也就是获取seL4_Send的第一个参数的值dest */
     cptr_t cptr = getRegister(thread, capRegister);
 
     /* faulting section */
